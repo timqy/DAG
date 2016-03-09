@@ -46,7 +46,7 @@ public class DAG<W extends Comparable<W>> {
      * Using khan's algorithm retrieve the topological ordering of the dag
      * @return a list containing the topological ordering.
      */
-    public List<Node<W>> TopologicalOrdering(){
+    public List<Node<W>> topologicalOrdering(){
         /** find a list of "start nodes" which have no incoming edges and insert them into a set S */
         HashMap<Node, W> removedEdges = new HashMap<>();
         List<Node<W>> sortedList = new ArrayList<>();
@@ -94,8 +94,11 @@ public class DAG<W extends Comparable<W>> {
     }
 
     public W weightOfLongestPath(Node<W> start, Node<W> end){
+        List<Node<W>> topological = topologicalOrdering();
 
-
+        for each vertex v ∈ V in linearized order
+        do dist(v) = max(u,v)∈E {dist(u) + w(u, v)}
+        return maxv∈V {dist(v)}
         return null;
     }
 

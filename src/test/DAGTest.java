@@ -29,25 +29,14 @@ public class DAGTest {
 
     }
 
-
-    @Test
-    public void testAddVertex() throws Exception {
-
-    }
-
-    @Test
-    public void testAddEdge() throws Exception {
-
-    }
-
     @Test
     public void testTopologicalOrdering() throws Exception {
         for(int i = 1; i <= 9; i++)
             dagtest.addEdge(i,i+1,2);
 
-        List<Node<Integer>> nodelist = dagtest.TopologicalOrdering();
+        List<Node<Integer>> nodelist = dagtest.topologicalOrdering();
         for(Node node : nodelist){
-            System.out.println("node" + node.getID());
+            System.out.println("[" + node.getID() + "] Node = " + node.getWeight());
         }
     }
 

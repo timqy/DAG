@@ -46,7 +46,7 @@ public class DAGTest {
             dagtest.addEdge(i,i+1,2);
         }
 
-        HashMap<Node<Integer>, Integer> map = dagtest.retrieveNodeEdges();
+        HashMap<Node<Integer>, Integer> map = dagtest.incomingEdges();
 
         assertTrue(map.containsValue(0));
         assertTrue(map.containsValue(1));

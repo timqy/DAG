@@ -43,8 +43,9 @@ public class DAG<W extends Comparable<W>> {
     }
 
     /**
-     * Using khan's algorithm retrieve the topological ordering of the dag
-     * @return a list containing the topological ordering.
+     * Using khan's algorithm to retrieve the topological ordering of the
+     * directed acyclic graph as a list of nodes.
+     * @return a list of nodes in topological order.
      */
     public List<Node<W>> topologicalOrdering(){
         /** find a list of "start nodes" which have no incoming edges and insert them into a set S */
@@ -53,7 +54,7 @@ public class DAG<W extends Comparable<W>> {
 
 
         Stack<Node<W>> nodeSet = new Stack<>();
-        HashMap<Node<W>,Integer> nodeEdges = retrieveNodeEdges();
+        HashMap<Node<W>,Integer> nodeEdges = incomingEdges();
         for(Node<W> startNode : nodeEdges.keySet())
             if(nodeEdges.get(startNode) == 0)
                 nodeSet.push(startNode);
@@ -76,15 +77,18 @@ public class DAG<W extends Comparable<W>> {
     }
 
     /**
-     * retrieves all nodes with no incoming edges
+     * Creates a list of nodes with their number of incoming
+     * edges
      * @return a list of nodes with no incoming edges.
      */
-    public HashMap<Node<W>,Integer> retrieveNodeEdges(){
+    public HashMap<Node<W>,Integer> incomingEdges(){
         HashMap<Node<W>,Integer> nodes = new HashMap<>();
-        for(Node<W> node : nodeMap.values()){
-            nodes.put(node,0);
-        }
 
+        /** Set all incoming edges to 0 */
+        for(Node<W> node : nodeMap.values())
+            nodes.put(node,0);
+
+        /** increment the value of each node with the number of incoming edges */
         for(Node<W> node : nodeMap.values()){
             for(Node edgeNode : node.getEdges().keySet()){
                 nodes.put(edgeNode,nodes.get(edgeNode)+1);
@@ -95,6 +99,10 @@ public class DAG<W extends Comparable<W>> {
 
     public W weightOfLongestPath(Node<W> start, Node<W> end){
         List<Node<W>> topological = topologicalOrdering();
+
+        for(Node<W> node : topological){
+
+        }
 
         for each vertex v ∈ V in linearized order
         do dist(v) = max(u,v)∈E {dist(u) + w(u, v)}

@@ -49,7 +49,7 @@ public class DAGTest {
         assertTrue(map.containsValue(1));
 
         for(Node n : map.keySet()){
-            System.out.println("node : " + map.get(n));
+            System.out.println("node ["+n.getID()+"]: " + map.get(n));
             assertTrue(map.get(n) == 1 || map.get(n) == 0 || map.get(n) == 2);
         }
     }

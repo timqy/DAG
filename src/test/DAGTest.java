@@ -19,21 +19,22 @@ public class DAGTest {
     public void setUp() throws Exception {
         dagtest = new DAG<Integer>();
 
-        for(int i = 0; i < 10;i++){
-            dagtest.addVertex(i);
-        }
-    }
+        dagtest.addVertex(4);
+        dagtest.addVertex(5);
+        dagtest.addVertex(3);
+        dagtest.addVertex(2);
+        dagtest.addVertex(7);
 
-    @After
-    public void tearDown() throws Exception {
-
+        dagtest.addEdge(1,2,2);
+        dagtest.addEdge(1,3,2);
+        dagtest.addEdge(2,4,1);
+        dagtest.addEdge(3,4,1);
+        dagtest.addEdge(3,5,1);
+        dagtest.addEdge(4,5,3);
     }
 
     @Test
     public void testTopologicalOrdering() throws Exception {
-        for(int i = 1; i <= 9; i++)
-            dagtest.addEdge(i,i+1,2);
-
         List<Node<Integer>> nodelist = dagtest.topologicalOrdering();
         for(Node node : nodelist){
             System.out.println("[" + node.getID() + "] Node = " + node.getWeight());
@@ -42,17 +43,39 @@ public class DAGTest {
 
     @Test
     public void testFindStartNodes() throws Exception {
-        for(int i = 1; i <= 9; i++){
-            dagtest.addEdge(i,i+1,2);
-        }
-
         HashMap<Node<Integer>, Integer> map = dagtest.incomingEdges();
 
         assertTrue(map.containsValue(0));
         assertTrue(map.containsValue(1));
 
         for(Node n : map.keySet()){
-            assertTrue(map.get(n) == 1 || map.get(n) == 0);
+            System.out.println("node : " + map.get(n));
+            assertTrue(map.get(n) == 1 || map.get(n) == 0 || map.get(n) == 2);
         }
+    }
+
+    @Test
+    public void testLongestPath(){
+        assertEquals((int)dagtest.weightOfLongestPath(1,5,new intOp()),24);
+    }
+
+    @Test
+    public void TestStringWeight(){
+        DAG StringDag = new DAG<String>();
+
+        StringDag.addVertex("4");
+        StringDag.addVertex("5");
+        StringDag.addVertex("3");
+        StringDag.addVertex("2");
+        StringDag.addVertex("7");
+
+        StringDag.addEdge(1,2,"2");
+        StringDag.addEdge(1,3,"2");
+        StringDag.addEdge(2,4,"1");
+        StringDag.addEdge(3,4,"1");
+        StringDag.addEdge(3,5,"1");
+        StringDag.addEdge(4,5,"3");
+
+        assertEquals((int)dagtest.weightOfLongestPath(1,5,new intOp()),24);
     }
 }

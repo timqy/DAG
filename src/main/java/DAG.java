@@ -1,7 +1,8 @@
 import java.util.*;
 
 /**
- * Created by dv13thg on 3/9/16.
+ * A directed acyclic graph with nodes and edges with the weight W.
+ *
  */
 public class DAG<W extends Comparable<W>> {
 
@@ -13,7 +14,6 @@ public class DAG<W extends Comparable<W>> {
         this.nodeID = 0;
     }
 
-
     /**
      * Increments the current nodeID's and assigns it to a
      * new Node with the input weight.
@@ -22,7 +22,7 @@ public class DAG<W extends Comparable<W>> {
      */
     public int addVertex(W weight){
         nodeID++;
-        nodeMap.put(nodeID, new Node<W>(nodeID,weight));
+        nodeMap.put(nodeID, new Node<>(nodeID,weight));
         return nodeID;
     }
 
@@ -48,17 +48,13 @@ public class DAG<W extends Comparable<W>> {
      * @return a list of nodes in topological order.
      */
     public List<Node<W>> topologicalOrdering(){
-        /** find a list of "start nodes" which have no incoming edges and insert them into a set S */
-        HashMap<Node, W> removedEdges = new HashMap<>();
-        List<Node<W>> sortedList = new ArrayList<>();
-
-
-        Stack<Node<W>> nodeSet = new Stack<>();
         HashMap<Node<W>,Integer> nodeEdges = incomingEdges();
+        List<Node<W>> sortedList = new ArrayList<>();
+        Stack<Node<W>> nodeSet = new Stack<>();
+
         for(Node<W> startNode : nodeEdges.keySet())
             if(nodeEdges.get(startNode) == 0)
                 nodeSet.push(startNode);
-
 
         while(!nodeSet.isEmpty()){
             Node<W> node = nodeSet.pop();
@@ -73,7 +69,6 @@ public class DAG<W extends Comparable<W>> {
             }
         }
         return sortedList;
-
     }
 
     /**
@@ -97,17 +92,39 @@ public class DAG<W extends Comparable<W>> {
         return nodes;
     }
 
-    public W weightOfLongestPath(Node<W> start, Node<W> end){
-        List<Node<W>> topological = topologicalOrdering();
+    /**
+     * Retrieves the length of the longest path by using breadth first.
+     * @param start the start node iD
+     * @param end end node ID
+     * @param operator the operator to use with the weight
+     * @return the highest value
+     */
+    public W weightOfLongestPath(int start, int end, Operator operator){
+        HashMap<Node<W>,W> visited = new HashMap<>();
+        Stack<Node<W>> nodes = new Stack<>();
+        nodes.push(nodeMap.get(start));
+        visited.put(nodeMap.get(start), nodeMap.get(start).getWeight());
 
-        for(Node<W> node : topological){
+        while(!nodes.isEmpty()){
+            Node<W> current = nodes.pop();
+            W currentLength = visited.get(current);
 
+            for (Node<W> adjacentNode : current.getEdges().keySet()){
+                /** This weight + the weight of the edge + the weight of the new node */
+                W adjLength = (W)operator.sum(currentLength,operator.sum(current.getEdges().get(adjacentNode), adjacentNode.getWeight()));
+
+                if(visited.containsKey(adjacentNode)){
+                    if(operator.compare(adjLength,visited.get(adjacentNode))){
+                        visited.put(adjacentNode,adjLength);
+                        nodes.push(adjacentNode);
+                    }
+                } else {
+                    nodes.push(adjacentNode);
+                    visited.put(adjacentNode,adjLength);
+                }
+            }
         }
-
-        for each vertex v ∈ V in linearized order
-        do dist(v) = max(u,v)∈E {dist(u) + w(u, v)}
-        return maxv∈V {dist(v)}
-        return null;
+        return visited.get(nodeMap.get(end));
     }
 
 

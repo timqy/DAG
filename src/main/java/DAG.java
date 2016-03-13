@@ -99,7 +99,7 @@ public class DAG<W extends Comparable<W>> {
      * @param operator the operator to use with the weight
      * @return the highest value
      */
-    public W weightOfLongestPath(int start, int end, Operator operator){
+    public W weightOfLongestPath(int start, int end, Operator operator, WeightOperator<W> f, WeightOperator<W> g){
         HashMap<Node<W>,W> visited = new HashMap<>();
         Stack<Node<W>> nodes = new Stack<>();
         nodes.push(nodeMap.get(start));
@@ -111,7 +111,10 @@ public class DAG<W extends Comparable<W>> {
 
             for (Node<W> adjacentNode : current.getEdges().keySet()){
                 /** This weight + the weight of the edge + the weight of the new node */
-                W adjLength = (W)operator.sum(currentLength,operator.sum(current.getEdges().get(adjacentNode), adjacentNode.getWeight()));
+                W adjLength = (W)operator.sum(currentLength,
+                                                operator.sum(
+                                                            (f.operate(adjacentNode.getWeight())),
+                                                            (g.operate(current.getEdges().get(adjacentNode)))));
 
                 if(visited.containsKey(adjacentNode)){
                     if(operator.compare(adjLength,visited.get(adjacentNode))){
@@ -126,6 +129,4 @@ public class DAG<W extends Comparable<W>> {
         }
         return visited.get(nodeMap.get(end));
     }
-
-
 }

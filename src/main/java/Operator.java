@@ -19,5 +19,4 @@ public interface Operator {
      * @return the sum of the two objects
      */
     public Object sum(Object a, Object b);
-
 }

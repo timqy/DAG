@@ -43,7 +43,13 @@ public class DAGTest {
 
     @Test
     public void testLongestPath(){
-        assertEquals((int)dagtest.weightOfLongestPath(1,5,new intOp()),24);
+        WeightOperator<Integer> wp = new WeightOperator<Integer>() {
+            @Override
+            public Integer operate(Integer a) {
+                return a;
+            }
+        };
+        assertEquals((int)dagtest.weightOfLongestPath(1,5,new intOp(),wp,wp),24);
     }
 
     @Test
@@ -63,6 +69,40 @@ public class DAGTest {
         StringDag.addEdge(3,5,"1");
         StringDag.addEdge(4,5,"3");
 
-        assertEquals((int)dagtest.weightOfLongestPath(1,5,new intOp()),24);
+        WeightOperator<String> wp = new WeightOperator<String>() {
+            @Override
+            public String operate(String a) {
+                return a;
+            }
+        };
+
+        System.out.println(StringDag.weightOfLongestPath(1,5,new StringOp(),wp,wp));
     }
+    public class intOp implements Operator{
+
+        @Override
+        public boolean compare(Object a, Object b) {
+            return (int)a > (int)b;
+        }
+
+        @Override
+        public Object sum(Object a, Object b) {
+            return (int)a + (int)b;
+        }
+    }
+
+    public class StringOp implements Operator{
+
+        @Override
+        public boolean compare(Object a, Object b) {
+            return ((String)a).compareTo((String)b) > 0;
+        }
+
+        @Override
+        public Object sum(Object a, Object b) {
+            return (String)a + (String)b;
+        }
+    }
+
 }
+

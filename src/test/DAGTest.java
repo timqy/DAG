@@ -42,19 +42,6 @@ public class DAGTest {
     }
 
     @Test
-    public void testFindStartNodes() throws Exception {
-        HashMap<Node<Integer>, Integer> map = dagtest.incomingEdges();
-
-        assertTrue(map.containsValue(0));
-        assertTrue(map.containsValue(1));
-
-        for(Node n : map.keySet()){
-            System.out.println("node ["+n.getID()+"]: " + map.get(n));
-            assertTrue(map.get(n) == 1 || map.get(n) == 0 || map.get(n) == 2);
-        }
-    }
-
-    @Test
     public void testLongestPath(){
         assertEquals((int)dagtest.weightOfLongestPath(1,5,new intOp()),24);
     }

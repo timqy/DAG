@@ -24,7 +24,7 @@ instance Weight (Integer) where
 -- Another implementation of Weight
 instance Weight ([Char]) where
 	wcomp x y = x > y
-	wsum x y = x ++ y 
+	wsum x y = x ++ y
 
 -- v = add_vertex(w)
 -- A vertex with the specified weight w is added to the DAG and its unique vertex identifier v is returned.
@@ -42,7 +42,7 @@ addEdge (Graph nodes edges) n1 n2 w
         && (not (existEdgeBetween (Graph nodes edges) n1 n2)) = (Graph nodes ((n1, n2, w):edges))
     |otherwise = error "Nodes does not exist or already exist edge between them"
 
---returns a boolean for if a node exist in the graph 
+--returns a boolean for if a node exist in the graph
 existNode :: Graph a -> Int -> Maybe (Int)
 existNode (Graph nodes edges) n = find (==n) [fst t | t <- nodes]
 
@@ -50,11 +50,11 @@ existNode (Graph nodes edges) n = find (==n) [fst t | t <- nodes]
 hasIncomingEdge :: Graph a -> Int -> Bool
 hasIncomingEdge (Graph nodes edges) n = (length (filter (\(_,b,_) -> b == n) edges)) > 0
 
--- Checks whether or not there excist an edge between two nodes 
+-- Checks whether or not there excist an edge between two nodes
 existEdgeBetween :: Graph a -> Int -> Int -> Bool
 existEdgeBetween (Graph nodes edges) n1 n2 = (length (filter (\(b,c,_) -> b == n1 && c == n2) edges)) > 0
 
---Retrieves all start nodes in a DAG ( Nodes with no incoming edges ) 
+--Retrieves all start nodes in a DAG ( Nodes with no incoming edges )
 getStartNodes :: Graph a -> [Int]
 getStartNodes a = (nub(getAllOutgoing a)) \\ (nub(getAllIncoming a))
 
@@ -93,7 +93,7 @@ removeEdgesFromNode (Graph nodes edges) nodeID = (Graph nodes (edges \\ (getNode
 
 -- Retrieves a list of nodes from which the given node has an edge to.
 getAdjacentNodes :: Graph a -> Int -> [Int]
-getAdjacentNodes (Graph nodes edges) nodeID = map (getIncoming) (filter (\(a,_,_) -> a == nodeID) edges) 
+getAdjacentNodes (Graph nodes edges) nodeID = map (getIncoming) (filter (\(a,_,_) -> a == nodeID) edges)
 
 --Wrapper for topologicalSort 
 -- Calls Topological sort with the graph and start nodes.
@@ -108,30 +108,44 @@ topologicalSort (Graph nodes edges) (head : tail) = head : (topologicalSort (rem
 -- w = weight_of_longest_path(a,b,f,g)
 -- Returns the weight w of the longest path which starts at the vertex with vertex identifier a and ends at the vertex with vertex identifier b.
 -- The weight of a path is the sum of f(w), where w ranges over all the weights of the vertices in the path, and g(w), where w ranges over all the weights of the edges in the path.
-weightOfLongestPath :: (Ord a,Weight a) => Graph a -> Int -> Int -> a
-weightOfLongestPath graph start end = traverseDag graph (getAdjacentNodes graph start) start end (getNodeWeight graph start)
+weightOfLongestPath :: (Weight a,Ord a) => Graph a -> Int -> Int -> (a -> a) -> (a -> a) -> a
+weightOfLongestPath graph start end f g  = traverseDag graph f g (getAdjacentNodes graph start) start end  (getNodeWeight graph start)
 
 
--- traverses the dag using recursion. 
+-- traverses the dag using recursion.
 -- There are three base cases
 -- when current node is the end node, then we return the sum of sum and node weight and edge weight from previous to this node
 -- When the node we are currently at cannot reach the end node we continue with the rest of the neighbours the list has.
--- else we count the maximum of the traverse of the current node and it's neighbours. 
-traverseDag :: (Ord a,Weight a) => Graph a -> [Int] -> Int-> Int -> a -> a
-traverseDag graph [] previous end sum = sum
-traverseDag graph (nodehead:nodetail) previous end sum 
-		| nodehead == end = (wsum sum (wsum (getNodeWeight graph nodehead) (getEdgeWeight graph previous nodehead)))
-		| not (isReachable graph [nodehead] end) = traverseDag graph nodetail previous end sum 
-		| otherwise = (maximum ([traverseDag graph (getAdjacentNodes graph nodehead) nodehead end (wsum sum (wsum (getNodeWeight graph nodehead) (getEdgeWeight graph previous nodehead)))] ++ [traverseDag graph nodetail previous end sum]))
+-- else we count the maximum of the traverse of the current node and it's neighbours.
+traverseDag :: (Weight a,Ord a) => Graph a -> (a -> a) -> (a -> a) -> [Int] -> Int-> Int -> a -> a
+traverseDag graph f g [] previous end sum = sum
+traverseDag graph f g (nodehead:nodetail) previous end sum
+		| nodehead == end = (wsum sum (wsum
+										(f (getNodeWeight graph nodehead))
+										(g (getEdgeWeight graph previous nodehead))))
+		| not (isReachable graph [nodehead] end) = traverseDag graph f g nodetail previous end sum
+		| otherwise = (weightMaximum
+			([traverseDag graph f g (getAdjacentNodes graph nodehead) nodehead end
+							(wsum sum (wsum
+										(f (getNodeWeight graph nodehead))
+										(g (getEdgeWeight graph previous nodehead))))]
+			++ [traverseDag graph f g nodetail previous end sum]))
 
+-- Finds maximum value in a list of weights. 
+weightMaximum :: (Weight a) => [a] -> a
+weightMaximum (head:[]) = head
+weightMaximum (head:tail)  
+			| wcomp head weight = head
+			| otherwise = weight
+			where weight = weightMaximum tail
 
 -- returns a bool for if a node is reachable from a certain node.
 isReachable :: Graph a -> [Int] -> Int -> Bool
 isReachable graph [] end = False
-isReachable graph (nodehead:nodetail) end 
+isReachable graph (nodehead:nodetail) end
 	| nodehead == end = True
 	| otherwise = (isReachable graph (getAdjacentNodes graph nodehead) end) ||
-					(isReachable graph nodetail end) 
+					(isReachable graph nodetail end)
 
 
 -- Retrieves the weight of the given edge between two nodes.
@@ -141,17 +155,20 @@ getEdgeWeight (Graph nodes edges) n1 n2 = (edgeWeight (head (filter (\(b,c,_) ->
 
 
 -- retrieves the weight of the given node.
-getNodeWeight :: Graph a -> Int -> a 
+getNodeWeight :: Graph a -> Int -> a
 getNodeWeight graph nodeID = (snd (head (getNode graph nodeID)))
 
--- goes through the list of nodes in graph and returns the node with the 
+-- goes through the list of nodes in graph and returns the node with the
 -- given id.
 getNode :: Graph a -> Int -> [Node a]
 getNode (Graph [] edges) nodeID = []
-getNode (Graph (head:tail) edges) nodeID 
+getNode (Graph (head:tail) edges) nodeID
 	| (fst head) == nodeID = [head]
 	| otherwise = getNode (Graph tail edges) nodeID
 
+
+testFunc :: a -> a
+testFunc a = a
 
 --TESTS
 -- g and e is graphs with integer as weight

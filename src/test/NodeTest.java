@@ -16,10 +16,6 @@ public class NodeTest {
         node = new Node<>(0,10);
     }
 
-    @After
-    public void tearDown() throws Exception {
-
-    }
 
     @Test
     public void testGetID() throws Exception {

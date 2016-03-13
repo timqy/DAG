@@ -76,7 +76,7 @@ public class DAG<W extends Comparable<W>> {
      * edges
      * @return a list of nodes with no incoming edges.
      */
-    public HashMap<Node<W>,Integer> incomingEdges(){
+    private HashMap<Node<W>,Integer> incomingEdges(){
         HashMap<Node<W>,Integer> nodes = new HashMap<>();
 
         /** Set all incoming edges to 0 */

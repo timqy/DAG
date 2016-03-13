@@ -97,6 +97,8 @@ public class DAG<W> {
      * @param start the start node iD
      * @param end end node ID
      * @param operator the operator to use with the weight
+     * @param f the weightoperator for nodes
+     * @param g the weightoperator for edges
      * @return the highest value
      */
     public W weightOfLongestPath(int start, int end, Operator operator, WeightOperator<W> f, WeightOperator<W> g){

@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleInstances, UndecidableInstances, OverlappingInstances #-}
 module DAG (Graph, addVertex) where
 import Data.Char
 import Data.List
@@ -13,17 +13,17 @@ data Graph a = Graph {
 } deriving (Show, Eq, Read)
 
 class Weight a where
-	wcmp :: a -> a -> Bool
+	wcomp :: a -> a -> Bool
 	wsum :: a -> a -> a
 
 -- Implementation of Weight as an integer
 instance Weight (Integer) where
-	wcmp x y = x > y
+	wcomp x y = x > y
 	wsum x y = x + y
 
 -- Another implementation of Weight
 instance Weight ([Char]) where
-	wcmp x y = x > y
+	wcomp x y = x > y
 	wsum x y = x ++ y 
 
 -- v = add_vertex(w)
@@ -91,15 +91,44 @@ topologicalSort (Graph nodes edges) (head : tail) = head : (topologicalSort (rem
 -- w = weight_of_longest_path(a,b,f,g)
 -- Returns the weight w of the longest path which starts at the vertex with vertex identifier a and ends at the vertex with vertex identifier b.
 -- The weight of a path is the sum of f(w), where w ranges over all the weights of the vertices in the path, and g(w), where w ranges over all the weights of the edges in the path.
-weightOfLongestPath :: Graph a -> Int -> Int -> Int
-weightOfLongestPath graph start end = traverseDag graph (getAdjacentNodes graph start) end 0
+weightOfLongestPath :: (Ord a,Weight a) => Graph a -> Int -> Int -> a
+weightOfLongestPath graph start end = traverseDag graph (getAdjacentNodes graph start) start end (getNodeWeight graph start)
 
-traverseDag :: Graph a -> [Int] -> Int -> Int -> Int
-traverseDag graph (nodehead:nodetail) end sum = 0
 
+
+traverseDag :: (Ord a,Weight a) => Graph a -> [Int] -> Int-> Int -> a -> a
+traverseDag graph [] previous end sum = sum
+traverseDag graph (nodehead:nodetail) previous end sum 
+		| nodehead == end = (wsum sum (wsum (getNodeWeight graph nodehead) (getEdgeWeight graph previous nodehead)))
+		| not (isReachable graph [nodehead] end) = traverseDag graph nodetail previous end sum 
+		| otherwise = (maximum ([traverseDag graph (getAdjacentNodes graph nodehead) nodehead end (wsum sum (wsum (getNodeWeight graph nodehead) (getEdgeWeight graph previous nodehead)))] ++ [traverseDag graph nodetail previous end sum]))
+
+isReachable :: Graph a -> [Int] -> Int -> Bool
+isReachable graph [] end = False
+isReachable graph (nodehead:nodetail) end 
+	| nodehead == end = True
+	| otherwise = (isReachable graph (getAdjacentNodes graph nodehead) end) ||
+					(isReachable graph nodetail end) 
+
+
+getEdgeWeight :: Graph a -> Int -> Int -> a
+getEdgeWeight (Graph nodes edges) n1 n2 = (edgeWeight (head (filter (\(b,c,_) -> b == n1 && c == n2) edges)))
+
+edgeWeight :: Edge a -> a
+edgeWeight (_,_,a) = a
+
+getNodeWeight :: Graph a -> Int -> a 
+getNodeWeight graph nodeID = (snd (head (getNode graph nodeID)))
+
+getNode :: Graph a -> Int -> [Node a]
+getNode (Graph [] edges) nodeID = []
+getNode (Graph (head:tail) edges) nodeID 
+	| (fst head) == nodeID = [head]
+	| otherwise = getNode (Graph tail edges) nodeID
 
 
 --TESTS
+-- g and e is graphs with integer as weight
 g = Graph [] [] -- Empty graph
 g1 = addVertex g 4
 g2 = addVertex (fst g1) 5
@@ -113,6 +142,21 @@ e3 = addEdge e2 1 3 1
 e4 = addEdge e3 2 3 1
 e5 = addEdge e4 2 4 1
 e6 = addEdge e5 3 4 3
+
+-- gc and ec is graphs with strings as weight
+gc = Graph [] [] -- Empty graph
+gc1 = addVertex gc "d"
+gc2 = addVertex (fst gc1) "e"
+gc3 = addVertex (fst gc2) "c"
+gc4 = addVertex (fst gc3) "b"
+gc5 = addVertex (fst gc4) "g"
+
+ec1 = addEdge (fst gc5) 0 1 "b"
+ec2 = addEdge ec1 0 2 "b"
+ec3 = addEdge ec2 1 3 "a"
+ec4 = addEdge ec3 2 3 "a"
+ec5 = addEdge ec4 2 4 "a"
+ec6 = addEdge ec5 3 4 "c"
 
 
 

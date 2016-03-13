@@ -4,7 +4,7 @@ import java.util.*;
  * A directed acyclic graph with nodes and edges with the weight W.
  *
  */
-public class DAG<W extends Comparable<W>> {
+public class DAG<W> {
 
     private HashMap<Integer,Node<W>> nodeMap;
     private int nodeID;

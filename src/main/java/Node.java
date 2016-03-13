@@ -3,7 +3,7 @@ import java.util.HashMap;
 /**
  *
  */
-public class Node<W extends Comparable<W>> {
+public class Node<W> {
 
     private int ID;
     private W weight;

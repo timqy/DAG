@@ -36,9 +36,11 @@ public class DAGTest {
     @Test
     public void testTopologicalOrdering() throws Exception {
         List<Node<Integer>> nodelist = dagtest.topologicalOrdering();
+        System.out.print("TopologicalOrdering [id,weight]: ");
         for(Node node : nodelist){
-            System.out.println("[" + node.getID() + "] Node = " + node.getWeight());
+            System.out.print("["+node.getID() + ","+node.getWeight()+"]");
         }
+        System.out.println("");
     }
 
     @Test
@@ -49,25 +51,27 @@ public class DAGTest {
                 return a;
             }
         };
-        assertEquals((int)dagtest.weightOfLongestPath(1,5,new intOp(),wp,wp),24);
+        int weightoflongest = (int)dagtest.weightOfLongestPath(1,5,new intOp(),wp,wp);
+        assertEquals(weightoflongest,24);
+        System.out.println("Weight of longest path string DAG : " + weightoflongest);
     }
 
     @Test
     public void TestStringWeight(){
         DAG StringDag = new DAG<String>();
 
-        StringDag.addVertex("4");
-        StringDag.addVertex("5");
-        StringDag.addVertex("3");
-        StringDag.addVertex("2");
-        StringDag.addVertex("7");
+        StringDag.addVertex("e");
+        StringDag.addVertex("d");
+        StringDag.addVertex("c");
+        StringDag.addVertex("b");
+        StringDag.addVertex("g");
 
-        StringDag.addEdge(1,2,"2");
-        StringDag.addEdge(1,3,"2");
-        StringDag.addEdge(2,4,"1");
-        StringDag.addEdge(3,4,"1");
-        StringDag.addEdge(3,5,"1");
-        StringDag.addEdge(4,5,"3");
+        StringDag.addEdge(1,2,"b");
+        StringDag.addEdge(1,3,"b");
+        StringDag.addEdge(2,4,"a");
+        StringDag.addEdge(3,4,"a");
+        StringDag.addEdge(3,5,"a");
+        StringDag.addEdge(4,5,"c");
 
         WeightOperator<String> wp = new WeightOperator<String>() {
             @Override
@@ -76,7 +80,8 @@ public class DAGTest {
             }
         };
 
-        System.out.println(StringDag.weightOfLongestPath(1,5,new StringOp(),wp,wp));
+        System.out.println("Weight of longest path string DAG : " +
+                            StringDag.weightOfLongestPath(1,5,new StringOp(),wp,wp));
     }
     public class intOp implements Operator{
 

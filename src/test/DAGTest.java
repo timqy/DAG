@@ -1,9 +1,9 @@
 
-import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.HashMap;
+import java.security.InvalidParameterException;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -51,6 +51,27 @@ public class DAGTest {
         };
         assertEquals((int)dagtest.weightOfLongestPath(1,5,new intOp(),wp,wp),24);
     }
+
+    @Test (expected=InvalidParameterException.class)
+    public void testCyclicDAG(){
+        DAG<Integer> cyc = new DAG<Integer>();;
+
+
+        cyc.addVertex(4);
+        cyc.addVertex(5);
+        cyc.addVertex(3);
+
+        cyc.addEdge(1,2,2);
+        cyc.addEdge(2,3,1);
+
+        /** edge node */
+        cyc.addVertex(5);
+        cyc.addEdge(4,3,1);
+
+        /** failing edge */
+        cyc.addEdge(3,1,1);
+    }
+
 
     @Test
     public void TestStringWeight(){

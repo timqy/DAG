@@ -1,3 +1,4 @@
+import java.security.InvalidParameterException;
 import java.util.*;
 
 /**
@@ -33,12 +34,16 @@ public class DAG<W> {
      * @param toID ID of the node to add an edge to
      * @param weight weight of the edge
      */
-    public void addEdge(int fromID, int toID, W weight){
+    public void addEdge(int fromID, int toID, W weight) throws InvalidParameterException{
         Node<W> from = nodeMap.get(fromID);
         Node<W> to = nodeMap.get(toID);
 
         if(!from.hasOutgoingEdge(to) && !to.hasOutgoingEdge(from)){
             from.addEdge(to,weight);
+            if(hasCycles()){
+                from.getEdges().remove(to);
+                throw new InvalidParameterException("Invalid Edge; creates a cycle");
+            }
         }
     }
 
@@ -69,6 +74,36 @@ public class DAG<W> {
             }
         }
         return sortedList;
+    }
+
+    /**
+     * Reduces all startnodes until there is no left.
+     * If no node is left in the DAG, there is no cycle.
+     * if there is nodes still left in the dag a cycle excists.
+     * @return boolean
+     */
+    private boolean hasCycles(){
+        HashMap<Node<W>,Integer> startNodes = incomingEdges();
+        boolean isDone = false;
+
+        while(!isDone) {
+            isDone = true;
+            Set<Node<W>> startNodesKeySet = startNodes.keySet();
+            Iterator<Map.Entry<Node<W>, Integer>> startnodeit = startNodes.entrySet().iterator();
+
+            while(startnodeit.hasNext()){
+                Map.Entry<Node<W>, Integer> node = startnodeit.next();
+
+                if (startNodes.get(node.getKey()) == 0) {
+                    for (Node<W> edgenode : node.getKey().getEdges().keySet()) {
+                        startNodes.put(edgenode, startNodes.get(edgenode) - 1);
+                        isDone = false;
+                    }
+                    startnodeit.remove();
+                }
+            }
+        }
+        return !startNodes.isEmpty();
     }
 
     /**

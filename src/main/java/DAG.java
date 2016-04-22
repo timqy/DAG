@@ -53,12 +53,15 @@ public class DAG<W> {
      * @return a list of nodes in topological order.
      */
     public List<Node<W>> topologicalOrdering(){
-        HashMap<Node<W>,Integer> nodeEdges = incomingEdges();
+        HashMap<Node<W>,Integer> nodeIncomingEdges = incomingEdges();
         List<Node<W>> sortedList = new ArrayList<>();
         Stack<Node<W>> nodeSet = new Stack<>();
 
-        for(Node<W> startNode : nodeEdges.keySet())
-            if(nodeEdges.get(startNode) == 0)
+        for(Node<W> startNode : nodeIncomingEdges.keySet())
+            System.out.println("startnode " + startNode.getID() + " edges " + nodeIncomingEdges.get(startNode));
+
+        for(Node<W> startNode : nodeIncomingEdges.keySet())
+            if(nodeIncomingEdges.get(startNode) == 0)
                 nodeSet.push(startNode);
 
         while(!nodeSet.isEmpty()){
@@ -66,11 +69,12 @@ public class DAG<W> {
             sortedList.add(node);
 
             HashMap<Node, W> edges = node.getEdges();
-            for(Node edgeNode : edges.keySet()) {
-                nodeEdges.put(edgeNode, nodeEdges.get(edgeNode) - 1);
+            for(Node<W> edgeNode : edges.keySet()) {
+                nodeIncomingEdges.put(edgeNode, nodeIncomingEdges.get(edgeNode) - 1);
 
-                if (nodeEdges.get(edgeNode) == 0)
+                if (nodeIncomingEdges.get(edgeNode) == 0)
                     nodeSet.push(edgeNode);
+
             }
         }
         return sortedList;
